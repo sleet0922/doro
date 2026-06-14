@@ -101,5 +101,5 @@ node_modules/
 package-lock.json
 
 # Batch utility scripts (user-local, not needed in repo)
-*.bat
+.bat
 *.ps1

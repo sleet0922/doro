@@ -1,5 +1,6 @@
 import os
 import random
+import math
 import live2d.v3 as live2d
 from live2d.v3 import clearBuffer
 from live2d.utils.canvas import Canvas
@@ -164,20 +165,25 @@ class Live2DWidget(QOpenGLWidget):
         self.model.SetScaleX(scale_x)
 
         print(f"[滑动] dx={total_dx}, mirrored={mirrored}")
-        self._slide_steps = 15
-        self._slide_dx = total_dx / 15.0
+        self._slide_steps_total = 25
+        self._slide_steps = 0
+        self._slide_start_x = self.x()
+        self._slide_target_x = self.x() + total_dx
         self._slide_timer.start()
 
     def _slide_tick(self):
-        """滑动动画每帧"""
-        if self._slide_steps <= 0:
+        """滑动动画每帧，使用 ease-in-out 缓动"""
+        if self._slide_steps >= self._slide_steps_total:
             self._slide_timer.stop()
+            self.move(int(self._slide_target_x), self.y())
             return
-        self._slide_steps -= 1
-        x, y = self.x(), self.y()
-        self.move(int(x + self._slide_dx), y)
-        if self._slide_steps == 0:
-            self._slide_timer.stop()
+
+        self._slide_steps += 1
+        # ease-in-out 缓动：先加速后减速
+        t = self._slide_steps / self._slide_steps_total
+        ease = 0.5 - 0.5 * math.cos(math.pi * t)
+        current_x = self._slide_start_x + (self._slide_target_x - self._slide_start_x) * ease
+        self.move(int(current_x), self.y())
 
     def show_context_menu(self, global_pos):
         menu = QMenu(self)
