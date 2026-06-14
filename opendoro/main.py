@@ -256,19 +256,8 @@ def main():
 
     app.setQuitOnLastWindowClosed(False)
 
-    splash.set_status(tr("splash.loading_provider"), 20)
+    splash.set_status("正在加载主题...", 20)
     app.processEvents()
-    try:
-        init_provider_framework()
-    except Exception as e:
-        logger.warning(f"Provider framework skipped: {e}")
-
-    splash.set_status(tr("splash.loading_agent"), 35)
-    app.processEvents()
-    try:
-        init_agent_framework()
-    except Exception as e:
-        logger.warning(f"Agent framework skipped: {e}")
 
     qss_path = resource_path("themes/light.qss")
     if os.path.exists(qss_path):
@@ -282,7 +271,7 @@ def main():
         logger.warning(f"Stylesheet not found: {qss_path}")
 
     logger.info("Initializing Live2DWidget...")
-    splash.set_status(tr("splash.loading_live2d", default="正在加载 Live2D 模型..."), 50)
+    splash.set_status("正在加载桌宠模型...", 50)
     app.processEvents()
 
     from src.core.database import DatabaseManager
@@ -312,7 +301,7 @@ def main():
     hide_pet_on_startup = settings.value("hide_pet_on_startup", False, type=bool)
 
     # ---- 提前初始化主界面（避免首次打开时的创建延迟）----
-    splash.set_status(tr("splash.loading_live2d", default="正在准备主界面..."), 75)
+    splash.set_status("正在准备控制台...", 75)
     app.processEvents()
     w.main_window = MainWindow(version_manager=None)
     w.main_window.set_live2d_widget(w)
@@ -328,7 +317,7 @@ def main():
 
     tray_icon = setup_tray_icon(app, w)
 
-    splash.set_status(tr("splash.loading_live2d", default="即将完成..."), 92)
+    splash.set_status("即将完成...", 92)
     app.processEvents()
 
     splash.close_splash()

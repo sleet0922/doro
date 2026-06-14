@@ -138,7 +138,7 @@ class SplashScreen(QWidget):
         container_layout.addWidget(self.title_label)
 
         # ---- 副标题 ----
-        self.subtitle_label = QLabel("你的桌面 AI 伙伴")
+        self.subtitle_label = QLabel("桌宠 · 精简版")
         self.subtitle_label.setAlignment(Qt.AlignCenter)
         self.subtitle_label.setStyleSheet(
             f"font-size: 13px; color: {self._tokens['text_secondary']}; "
