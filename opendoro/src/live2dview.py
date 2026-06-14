@@ -38,6 +38,13 @@ class Live2DWidget(QOpenGLWidget):
         self.auto_switch_timer.timeout.connect(self._auto_switch)
         self.auto_switch_timer.setInterval(15000)
 
+        # 滑动动画
+        self._slide_steps = 0
+        self._slide_dx = 0
+        self._slide_timer = QTimer(self)
+        self._slide_timer.timeout.connect(self._slide_tick)
+        self._slide_timer.setInterval(20)
+
     def initializeGL(self) -> None:
         self.makeCurrent()
 
@@ -102,26 +109,78 @@ class Live2DWidget(QOpenGLWidget):
             self.model.Drag(target_x, target_y)
             self.update()
 
+    def play_motion(self, group: str):
+        """播放指定动作组，跑动作触发滑动"""
+        try:
+            self.makeCurrent()
+            self.model.StartRandomMotion(group, live2d.MotionPriority.FORCE)
+            print(f"[动作] 播放: {group}")
+        except Exception as e:
+            print(f"[动作] 错误: {e}")
+            return
+
+        if group == "跑":
+            if random.random() < 0.5:
+                # 左移：恢复朝右（不镜像）
+                self._start_slide(-80, mirrored=False)
+            else:
+                # 右移：Y轴翻转（镜像）
+                self._start_slide(80, mirrored=True)
+
     def _auto_switch(self):
-        """每 15 秒自动随机切换一次表情和动作"""
+        """每 15 秒自动随机切换表情和动作，附带 50% 概率滑动"""
+        group = None
+
+        # 表情（手动随机，避免 SetRandomExpression 的 UTF-8 解码 bug）
         try:
             self.makeCurrent()
             if self.expression_ids:
-                self.model.SetRandomExpression()
-            if self.motion_groups:
-                group = random.choice(list(self.motion_groups.keys()))
-                self.model.StartRandomMotion(group, live2d.MotionPriority.NORMAL)
+                exp = random.choice(self.expression_ids)
+                self.model.SetExpression(exp)
+                print(f"[AutoSwitch] 表情: {exp}")
         except Exception as e:
-            print(f"Auto switch error: {e}")
+            print(f"[AutoSwitch] 表情错误: {e}")
+
+        # 动作
+        if self.motion_groups:
+            group = random.choice(list(self.motion_groups.keys()))
+            self.play_motion(group)
+
+    def _start_slide(self, total_dx: int, mirrored: bool):
+        """开始滑动动画，mirrored=True 则 Y 轴翻转朝左"""
+        if not hasattr(self, '_slide_timer'):
+            return
+
+        # 边界反弹
+        screen = QApplication.primaryScreen().availableGeometry()
+        new_x = self.x() + total_dx
+        if new_x < screen.x() or new_x + self.width() > screen.x() + screen.width():
+            total_dx = -total_dx
+            mirrored = not mirrored
+
+        # 设置镜像方向
+        self.is_mirrored = mirrored
+        scale_x = -1.0 if mirrored else 1.0
+        self.model.SetScaleX(scale_x)
+
+        print(f"[滑动] dx={total_dx}, mirrored={mirrored}")
+        self._slide_steps = 15
+        self._slide_dx = total_dx / 15.0
+        self._slide_timer.start()
+
+    def _slide_tick(self):
+        """滑动动画每帧"""
+        if self._slide_steps <= 0:
+            self._slide_timer.stop()
+            return
+        self._slide_steps -= 1
+        x, y = self.x(), self.y()
+        self.move(int(x + self._slide_dx), y)
+        if self._slide_steps == 0:
+            self._slide_timer.stop()
 
     def show_context_menu(self, global_pos):
         menu = QMenu(self)
-
-        action_console = QAction("⚙️ 控制台", self)
-        action_console.triggered.connect(self.open_main_window)
-        menu.addAction(action_console)
-
-        menu.addSeparator()
 
         action_quit = QAction("❌ 退出", self)
         action_quit.triggered.connect(QApplication.instance().quit)
@@ -166,7 +225,9 @@ class Live2DWidget(QOpenGLWidget):
         if hasattr(self, "drag_position"):
             del self.drag_position
 
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MiddleButton:
+            self.open_main_window()
+        elif event.button() == Qt.RightButton:
             self.show_context_menu(event.globalPos())
 
         event.accept()
@@ -175,6 +236,8 @@ class Live2DWidget(QOpenGLWidget):
         super().closeEvent(event)
         if hasattr(self, 'auto_switch_timer'):
             self.auto_switch_timer.stop()
+        if hasattr(self, '_slide_timer'):
+            self._slide_timer.stop()
         if hasattr(self, 'model'):
             live2d.glRelease()
         live2d.dispose()

@@ -304,6 +304,9 @@ def main():
         logger.warning(f"Failed to load model from database: {e}")
 
     w = Live2DWidget(path=default_model_path)
+    # 桌宠初始位置：桌面左侧垂直居中
+    screen = QApplication.primaryScreen().availableGeometry()
+    w.move(0, (screen.height() - w.height()) // 2)
 
     settings = QSettings("DoroPet", "Settings")
     hide_pet_on_startup = settings.value("hide_pet_on_startup", False, type=bool)

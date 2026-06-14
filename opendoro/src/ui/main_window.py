@@ -14,18 +14,26 @@ from src.core.logger import logger
 from src.core.font_scale_utils import apply_font_scale
 from src.core.app_theme import THEME_COLOR
 
+from src.ui.pages.trigger_interface import TriggerInterface
+
 class MainWindow(FluentWindow):
-    """简化的控制台窗口，功能待后续添加"""
+    """简化的控制台窗口"""
 
     def __init__(self, version_manager=None):
         super().__init__()
-        logger.info("Initializing MainWindow (simplified)...")
+        logger.info("Initializing MainWindow...")
         self.setObjectName("MainWindow")
         self._version_manager = version_manager
 
         self.setWindowTitle("Doro Pet")
         self.resize(1024, 800)
 
+        # 创建页面
+        self.trigger_interface = TriggerInterface(self)
+        QApplication.processEvents()
+
+        # 导航
+        self.addSubInterface(self.trigger_interface, FIF.EMOJI_TAB_SYMBOLS, "互动")
         QApplication.processEvents()
 
         # 主题
@@ -62,6 +70,8 @@ class MainWindow(FluentWindow):
 
     def set_live2d_widget(self, widget):
         self.live2d_widget = widget
+        if hasattr(self, 'trigger_interface'):
+            self.trigger_interface.set_live2d_widget(widget)
 
     def set_version_manager(self, version_manager):
         self._version_manager = version_manager
