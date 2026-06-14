@@ -1,0 +1,105 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+
+# C extensions / platform-specific binaries
+*.so
+*.dll
+*.dylib
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual environments / runtime
+venv/
+.venv/
+env/
+ENV/
+runtime/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Windows thumbnail cache
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# macOS
+.DS_Store
+._*
+
+# Logs
+*.log
+logs/
+
+# Runtime generated files
+*.tmp
+*.bak
+
+# Go (abandoned projects, if re-created)
+go_project/
+doro-pet/
+*.exe
+
+# Node (if any)
+node_modules/
+package-lock.json
+
+# Batch utility scripts (user-local, not needed in repo)
+*.bat
+*.ps1
